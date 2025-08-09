@@ -23,6 +23,12 @@ class DicePage extends StatefulWidget {
 }
 
 class _DicePageState extends State<DicePage> {
+  int leftDice = 1;
+  int rightDice = 1;
+  final Random _random = Random();
+
+  void rollDice() {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,6 +38,28 @@ class _DicePageState extends State<DicePage> {
         centerTitle: true,
         backgroundColor: Colors.redAccent,
         elevation: 0,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: TextButton(
+                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                  onPressed: rollDice,
+                  child: Image.asset('assets/images/dice$leftDice.png'),
+                ),
+              ),
+              Expanded(
+                child: TextButton(
+                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                  onPressed: rollDice,
+                  child: Image.asset('assets/images/dice$rightDice.png'),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

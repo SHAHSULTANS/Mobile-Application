@@ -27,7 +27,12 @@ class _DicePageState extends State<DicePage> {
   int rightDice = 1;
   final Random _random = Random();
 
-  void rollDice() {}
+  void rollDice() {
+    setState(() {
+      leftDice = _random.nextInt(6) + 1;
+      rightDice = _random.nextInt(6) + 1;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

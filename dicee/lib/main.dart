@@ -25,6 +25,14 @@ class DicePage extends StatefulWidget {
 class _DicePageState extends State<DicePage> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      backgroundColor: Colors.red,
+      appBar: AppBar(
+        title: const Text('Dicee'),
+        centerTitle: true,
+        backgroundColor: Colors.redAccent,
+        elevation: 0,
+      ),
+    );
   }
 }

@@ -1,6 +1,6 @@
 class AppConstants {
   static const String apiKey =
-      "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";
+      "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";
 
   static const String baseUrl = "https://openrouter.ai/api/v1/chat/completions";
 }

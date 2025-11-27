@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'chat_page.dart';
 
 class RegistrationPage extends StatefulWidget {
@@ -11,16 +12,44 @@ class RegistrationPage extends StatefulWidget {
 class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _loading = false;
 
-  void _register() {
-    // Dummy register: accept anything
-    if (_emailController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
+  Future<void> _register() async {
+    setState(() => _loading = true);
+    try {
+      // Firebase দিয়ে নতুন ইউজার তৈরি
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // সফল হলে ChatPage এ যাও
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const ChatPage()),
       );
+    } on FirebaseAuthException catch (e) {
+      String message;
+      if (e.code == 'weak-password') {
+        message = 'পাসওয়ার্ড দুর্বল, আরও শক্তিশালী দিন';
+      } else if (e.code == 'email-already-in-use') {
+        message = 'এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট আছে';
+      } else {
+        message = e.message ?? 'রেজিস্ট্রেশন ব্যর্থ হয়েছে';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } finally {
+      setState(() => _loading = false);
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -42,7 +71,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
               decoration: const InputDecoration(labelText: 'Password'),
             ),
             const SizedBox(height: 32),
-            ElevatedButton(onPressed: _register, child: const Text('Register')),
+            ElevatedButton(
+              onPressed: _loading ? null : _register,
+              child: Text(_loading ? 'Registering...' : 'Register'),
+            ),
           ],
         ),
       ),

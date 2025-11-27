@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'registration_page.dart';
 import 'chat_page.dart';
 
@@ -12,16 +13,45 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _loading = false;
 
-  void _login() {
-    // Dummy login: accept anything
-    if (_emailController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
+  Future<void> _login() async {
+    setState(() => _loading = true);
+    try {
+      // Firebase দিয়ে লগইন করার চেষ্টা
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // সফল হলে ChatPage এ যাও
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const ChatPage()),
       );
+    } on FirebaseAuthException catch (e) {
+      // কোনো সমস্যা হলে বার্তা দেখাও
+      String message;
+      if (e.code == 'user-not-found') {
+        message = 'এই ইমেইল দিয়ে কোনো ইউজার পাওয়া যায়নি';
+      } else if (e.code == 'wrong-password') {
+        message = 'পাসওয়ার্ড ভুল';
+      } else {
+        message = e.message ?? 'লগইন ব্যর্থ হয়েছে';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } finally {
+      setState(() => _loading = false);
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -43,7 +73,10 @@ class _LoginPageState extends State<LoginPage> {
               decoration: const InputDecoration(labelText: 'Password'),
             ),
             const SizedBox(height: 32),
-            ElevatedButton(onPressed: _login, child: const Text('Login')),
+            ElevatedButton(
+              onPressed: _loading ? null : _login,
+              child: Text(_loading ? 'Logging in...' : 'Login'),
+            ),
             TextButton(
               onPressed: () {
                 Navigator.push(
